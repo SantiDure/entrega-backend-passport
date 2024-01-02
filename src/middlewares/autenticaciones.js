@@ -33,12 +33,13 @@ passport.use(
       callbackURL: GITHUB_CALLBACK_URL,
     },
     async (_, __, profile, done) => {
-      let user = await usersManager.findOne({ email: profile.username });
+      let user = await usersManager.findOne({ email: profile.displayName });
       if (!user) {
         user = await usersManager.create({
-          name: profile.displayName,
-          email: profile.username,
+          email: profile.email,
+          first_name: profile.displayName,
         });
+        console.log(profile);
       }
       done(null, user.toObject());
     }

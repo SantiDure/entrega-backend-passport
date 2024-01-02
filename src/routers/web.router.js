@@ -2,7 +2,6 @@ import { Router } from "express";
 import { productsManager } from "../dao/mongodb/mongodb.js";
 import { cartsManager } from "../dao/mongodb/mongodb.js";
 import { onlySessionActive } from "../middlewares/autorizaciones.js";
-import passport from "passport";
 export const webRouter = Router();
 
 webRouter.get("/", (req, res) => {
