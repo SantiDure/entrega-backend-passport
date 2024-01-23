@@ -1,18 +1,18 @@
 import mongoose from "mongoose";
 import { randomUUID } from "node:crypto";
 import { hashCompare } from "../../../utils/criptograph.js";
-
+import { generateUniqueUsername } from "../../../utils/randomUserName.js";
 const collection = "users";
-function randomName() {
-  return `user+${randomUUID()}`;
-}
 const userSchema = new mongoose.Schema(
   {
     _id: { type: String, default: randomUUID },
     email: { type: String, unique: true },
-    password: { type: String, default: "1234" },
-    first_name: { type: String, default: randomName },
+    password: { type: String, required: true },
+    first_name: { type: String, default: generateUniqueUsername },
     last_name: { type: String, default: "unknow" },
+    age: { type: Number, default: 0 },
+    cart: { type: String, default: randomUUID },
+    role: { type: String, default: "user" },
   },
   {
     strict: "throw",
@@ -46,6 +46,8 @@ const userSchema = new mongoose.Schema(
             email: user["email"],
             first_name: user["first_name"],
             last_name: user["last_name"],
+            age: user["age"],
+            cart: user["cart"],
             rol: "user",
           };
         }

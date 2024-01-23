@@ -1,17 +1,26 @@
+import { COOKIE_SECRET, PORT } from "./config.js";
 import express, { Router } from "express";
 import handlebars from "express-handlebars";
 import { apiRouter } from "./routers/api.router.js";
 import { webRouter } from "./routers/web.router.js";
 import { Server } from "socket.io";
-import { productsManager } from "./dao/mongodb/mongodb.js";
+import { connectDb, productsManager } from "./dao/mongodb/mongodb.js";
 import { messagesManager } from "./dao/mongodb/models/Message.js";
 import { sesiones } from "./middlewares/sesiones.js";
 import {
   passportInitialize,
   passportSession,
 } from "./middlewares/autenticaciones.js";
+import cookieParser from "cookie-parser";
+/////////////////////////////
+// CONECTAR DB
+
+await connectDb();
+
+//SERVER
 
 const app = express();
+app.use(cookieParser(COOKIE_SECRET));
 app.use(sesiones);
 app.use(passportInitialize, passportSession);
 app.engine("handlebars", handlebars.engine());
@@ -24,11 +33,11 @@ app.use((err, req, res, next) => {
 
 app.use("/api", apiRouter);
 
-const PORT = 8080;
-
 const server = app.listen(PORT, () =>
   console.log(`servidor levantado en el puerto ${PORT}`)
 );
+
+/////////////////////////////
 
 //WEBSOCKET
 const websocketServer = new Server(server);

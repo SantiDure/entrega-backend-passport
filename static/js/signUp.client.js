@@ -10,7 +10,7 @@ formRegister?.addEventListener("submit", async (event) => {
     body: new URLSearchParams(new FormData(formRegister)),
   });
 
-  if (response.status === 201) {
+  if (response.status == 201) {
     const { payload: usuario } = await response.json();
     alert(JSON.stringify(usuario));
     window.location.href = "/login";

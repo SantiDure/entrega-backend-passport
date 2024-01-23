@@ -6,16 +6,76 @@ import {
   GITHUB_CLIENT_ID,
   GITHUB_CLIENT_SECRET,
   GITHUB_CALLBACK_URL,
+  COOKIE_OPTS,
+  JWT_SECRET,
 } from "../config.js";
+import { ExtractJwt, Strategy as JwtStrategy } from "passport-jwt";
+import { decrypt, encrypt } from "../utils/criptograph.js";
+
+export async function appendJwtAsCookie(req, res, next) {
+  try {
+    const token = await encrypt(req.user);
+    res.cookie("auth", token, COOKIE_OPTS);
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function removeJwtFromCookies(req, res, next) {
+  res.clearCookie("auth", COOKIE_OPTS);
+  next();
+}
+
+passport.use(
+  "jwt",
+  new JwtStrategy(
+    {
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        function (req) {
+          let token = null;
+          if (req?.signedCookies) {
+            token = req.signedCookies["auth"];
+          }
+          return token;
+        },
+      ]),
+      secretOrKey: JWT_SECRET,
+    },
+    function loginUser(user, done) {
+      // console.log(user)
+      done(null, user);
+    }
+  )
+);
+
+export async function authenticate(req, res, next) {
+  if (!req.token) {
+    return res.status(401).json({
+      error: "no access token provided",
+    });
+  }
+
+  try {
+    const decoded = await decrypt(req.token);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({
+      error: "authentication failed",
+    });
+  }
+}
+
 passport.use(
   "loginLocal",
   new LocalStrategy(
     {
       usernameField: "email",
     },
-    async function verificationCallback(username, password, done) {
+    async function verificationCallback(email, password, done) {
       try {
-        const datosUsuario = await usersManager.login(username, password);
+        const datosUsuario = await usersManager.login(email, password);
         done(null, datosUsuario);
       } catch (error) {
         done(error);
@@ -39,7 +99,6 @@ passport.use(
           email: profile.email,
           first_name: profile.displayName,
         });
-        console.log(profile);
       }
       done(null, user.toObject());
     }

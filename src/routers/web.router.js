@@ -50,8 +50,6 @@ webRouter.get("/products", onlySessionActive, async (req, res, next) => {
     opcionesDePaginacion
   );
 
-  console.log(result);
-
   res.render("products.handlebars", {
     title: "products",
     ...req.user,

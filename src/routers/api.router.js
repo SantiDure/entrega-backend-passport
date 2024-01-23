@@ -12,3 +12,9 @@ apiRouter.use("/carts", cartRouter);
 apiRouter.use("/messages", messageRouter);
 apiRouter.use("/sessions", sessionRouter);
 apiRouter.use("/users", usersRouter);
+apiRouter.use((error, req, res, next) => {
+  res.status(401).json({
+    status: "error",
+    message: "login failed",
+  });
+});
